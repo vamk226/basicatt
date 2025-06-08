@@ -138,7 +138,7 @@
       .catch(err => console.error("Failed to load timetable:", err));
 
     let attendance = JSON.parse(localStorage.getItem('attendance')) || {};
-
+    
     function updateSchedule() {
       if (!document.getElementById('view-timetable').classList.contains('hidden')) {
         const tabs = document.querySelector('.tabs button.active');
@@ -173,10 +173,6 @@
     function showAttendanceStats() {
       clearSections();
     
-      // Preserve current tab
-      const activeTab = document.querySelector('.tab-btn.active');
-      const currentTab = activeTab ? activeTab.textContent : 'Theory';
-    
       const statsDiv = document.getElementById('stats');
       statsDiv.classList.remove('hidden');
     
@@ -188,66 +184,112 @@
           <button onclick="clearLogs()" style="background-color: red; margin-left: 10px;">Clear Attendance Logs</button>
         </div>
         <div id="Theory" class="tab-content"></div>
-        <div id="Lab" class="tab-content hidden">
-          <div style="margin: 10px 0;">
-            <label><input type="radio" name="batchSelectStatsLab" value="1" checked> Batch 1</label>
-            <label><input type="radio" name="batchSelectStatsLab" value="2"> Batch 2</label>
-          </div>
-        </div>
+        <div id="Lab" class="tab-content hidden"></div>
       `;
     
-      // Use timeout to allow DOM to render before accessing radio buttons
-      setTimeout(() => {
-        const selectedLabBatch = getSelectedBatch('batchSelectStatsLab');
+      // === THEORY SECTION ===
+      const groupedSubjects = { Theory: new Set() };
     
-        const groupedSubjects = {
-          Theory: new Set(),
-          Lab: new Set()
-        };
-    
-        for (const day in timetable) {
-          for (const slot in timetable[day]) {
-            const entries = timetable[day][slot];
-            if (entries && entries !== 'Lunch') {
-              for (const key in entries) {
-                const subj = entries[key];
-                if (subj.Type === 'Lab' && subj.Batch && subj.Batch !== selectedLabBatch) continue;
-                groupedSubjects[subj.Type]?.add(subj['Course Name']);
-              }
+      for (const day in timetable) {
+        for (const slot in timetable[day]) {
+          const entries = timetable[day][slot];
+          if (entries && entries !== 'Lunch') {
+            for (const key in entries) {
+              const subj = entries[key];
+              if (subj.Type === 'Theory') groupedSubjects.Theory.add(subj['Course Name']);
             }
           }
         }
+      }
     
-        const subjectTotals = {};
-        for (const date in attendance) {
-          for (const subject in attendance[date]) {
-            const status = attendance[date][subject];
-            if (!subjectTotals[subject]) subjectTotals[subject] = { present: 0, total: 0, logs: [] };
-            if (status === 'Present' || status === 'Attendance Given') subjectTotals[subject].present++;
-            if (status !== 'No Class') subjectTotals[subject].total++;
-            subjectTotals[subject].logs.push({ date, status });
-          }
+      const subjectTotals = {};
+      for (const date in attendance) {
+        for (const subject in attendance[date]) {
+          const status = attendance[date][subject];
+          if (!subjectTotals[subject]) subjectTotals[subject] = { present: 0, total: 0, logs: [] };
+          if (status === 'Present' || status === 'Attendance Given') subjectTotals[subject].present++;
+          if (status !== 'No Class') subjectTotals[subject].total++;
+          subjectTotals[subject].logs.push({ date, status });
         }
+      }
     
-        ['Theory', 'Lab'].forEach(type => {
-          const container = document.getElementById(type);
-          groupedSubjects[type].forEach(subject => {
-            const data = subjectTotals[subject] || { present: 0, total: 0, logs: [] };
-            const percent = data.total > 0 ? ((data.present / data.total) * 100).toFixed(1) : '0';
-            const logId = `log-${subject.replace(/\s+/g, '-')}`;
-            container.innerHTML += `
-              <p><strong style="cursor:pointer;" onclick="toggleLogs('${logId}')">${subject}</strong>: ${percent}% (${data.present}/${data.total})</p>
-              <ul id="${logId}" class="hidden">
-                ${data.logs.map(log => `<li>${log.date} – ${log.status}</li>`).join('')}
-              </ul>
-            `;
-          });
-        });
+      const theoryContainer = document.getElementById('Theory');
+      groupedSubjects.Theory.forEach(subject => {
+        const data = subjectTotals[subject] || { present: 0, total: 0, logs: [] };
+        const percent = data.total > 0 ? ((data.present / data.total) * 100).toFixed(1) : '0';
+        const logId = `log-${subject.replace(/\s+/g, '-')}`;
+        theoryContainer.innerHTML += `
+          <p><strong style="cursor:pointer;" onclick="toggleLogs('${logId}')">${subject}</strong>: ${percent}% (${data.present}/${data.total})</p>
+          <ul id="${logId}" class="hidden">
+            ${data.logs.map(log => `<li>${log.date} – ${log.status}</li>`).join('')}
+          </ul>
+        `;
+      });
     
-        showTab(currentTab); // Restore active tab
-      }, 0); // End of setTimeout
+      // === LAB SECTION ===
+      renderLabStats();
+    
+      // Restore active tab if any
+      const active = document.querySelector('.tab-btn.active');
+      showTab(active ? active.textContent : 'Theory');
     }
 
+    function renderLabStats() {
+      const selectedLabBatch = getSelectedBatch('batchSelectStatsLab');
+      const labContainer = document.getElementById('Lab');
+    
+      // Clear previous subject list (but keep the batch radio buttons)
+      labContainer.innerHTML = `
+        <div style="margin: 10px 0;">
+          <label><input type="radio" name="batchSelectStatsLab" value="1" ${selectedLabBatch === '1' ? 'checked' : ''}> Batch 1</label>
+          <label><input type="radio" name="batchSelectStatsLab" value="2" ${selectedLabBatch === '2' ? 'checked' : ''}> Batch 2</label>
+        </div>
+      `;
+    
+      const groupedSubjects = { Lab: new Set() };
+    
+      for (const day in timetable) {
+        for (const slot in timetable[day]) {
+          const entries = timetable[day][slot];
+          if (entries && entries !== 'Lunch') {
+            for (const key in entries) {
+              const subj = entries[key];
+              if (subj.Type === 'Lab' && subj.Batch && subj.Batch !== selectedLabBatch) continue;
+              if (subj.Type === 'Lab') groupedSubjects.Lab.add(subj['Course Name']);
+            }
+          }
+        }
+      }
+    
+      const subjectTotals = {};
+      for (const date in attendance) {
+        for (const subject in attendance[date]) {
+          const status = attendance[date][subject];
+          if (!subjectTotals[subject]) subjectTotals[subject] = { present: 0, total: 0, logs: [] };
+          if (status === 'Present' || status === 'Attendance Given') subjectTotals[subject].present++;
+          if (status !== 'No Class') subjectTotals[subject].total++;
+          subjectTotals[subject].logs.push({ date, status });
+        }
+      }
+    
+      groupedSubjects.Lab.forEach(subject => {
+        const data = subjectTotals[subject] || { present: 0, total: 0, logs: [] };
+        const percent = data.total > 0 ? ((data.present / data.total) * 100).toFixed(1) : '0';
+        const logId = `log-${subject.replace(/\s+/g, '-')}`;
+        labContainer.innerHTML += `
+          <p><strong style="cursor:pointer;" onclick="toggleLogs('${logId}')">${subject}</strong>: ${percent}% (${data.present}/${data.total})</p>
+          <ul id="${logId}" class="hidden">
+            ${data.logs.map(log => `<li>${log.date} – ${log.status}</li>`).join('')}
+          </ul>
+        `;
+      });
+    
+      // Add event listener after rendering
+      const radios = document.getElementsByName('batchSelectStatsLab');
+      radios.forEach(r => r.addEventListener('change', renderLabStats));
+    }
+
+    
     function showTab(type) {
       document.getElementById('Theory').classList.add('hidden');
       document.getElementById('Lab').classList.add('hidden');
