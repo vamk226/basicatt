@@ -172,6 +172,11 @@
 
     function showAttendanceStats() {
   clearSections();
+
+  // ✅ Remember which tab was active before re-rendering
+  const activeTab = document.querySelector('.tab-btn.active');
+  const currentTab = activeTab ? activeTab.textContent : 'Theory';
+
   const statsDiv = document.getElementById('stats');
   statsDiv.classList.remove('hidden');
   statsDiv.innerHTML = `
@@ -231,6 +236,7 @@
       `;
     });
   });
+  showTab(currentTab);
 }
 
     function showTab(type) {
