@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PharmD Attendance Tracker</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="data:,">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background-color: #f4f6f8;
+      color: #333;
+    }
+    header {
+      background-color: #007bff;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    button, input[type="date"], select {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    input[type="date"], input[type="text"], input[type="file"] {
+      background-color: white;
+      color: #333;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .hidden {
+      display: none;
+    }
+    .section {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+    .class-entry {
+      margin-bottom: 15px;
+    }
+    h3 {
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+    }
+    .tabs button {
+      margin: 5px;
+      background-color: #6c757d;
+    }
+    .tab-btn.active, .tabs button.active {
+      background-color: #007bff;
+    }
+  </style>
+</head>
+<body>
+  <header>PharmD Attendance Tracker</header>
+
+  <nav>
+    <button onclick="showTimetableView()">View Timetable</button>
+    <button onclick="showAttendanceStats()">Attendance Stats</button>
+    <button onclick="showAddAttendance()">Add Attendance</button>
+  </nav>
+
+  <div id="view-timetable" class="section hidden">
+    <h3>Select Day to Show Timetable</h3>
+    <div style="margin: 10px 0;">
+      <label><input type="radio" name="batchSelectView" value="1" checked onchange="updateSchedule()"> Batch 1</label>
+      <label><input type="radio" name="batchSelectView" value="2" onchange="updateSchedule()"> Batch 2</label>
+    </div>
+    <div class="tabs">
+      <button onclick="showDaySchedule('Monday')">Monday</button>
+      <button onclick="showDaySchedule('Tuesday')">Tuesday</button>
+      <button onclick="showDaySchedule('Wednesday')">Wednesday</button>
+      <button onclick="showDaySchedule('Thursday')">Thursday</button>
+      <button onclick="showDaySchedule('Friday')">Friday</button>
+      <button onclick="showDaySchedule('Saturday')">Saturday</button>
+    </div>
+    <div id="day-schedule"><p>Please select a day to view the timetable.</p></div>
+  </div>
+
+  <div id="stats" class="section hidden"></div>
+
+  <div id="add-attendance" class="section hidden">
+    <h3>Select Date to Log Attendance</h3>
+    <div style="margin: 10px 0;">
+      <label><input type="radio" name="batchSelectAdd" value="1" checked onchange="updateSchedule()"> Batch 1</label>
+      <label><input type="radio" name="batchSelectAdd" value="2" onchange="updateSchedule()"> Batch 2</label>
+    </div>
+    <input id="datePicker" type="date" onchange="showDateSchedule()" />
+    <noscript>
+      <p><strong>?? Your browser does not support date input.</strong></p>
+    </noscript>
+
+    <div style="margin: 15px 0;">
+      <button onclick="exportAttendance()"> Export Attendance</button>
+      <label style="cursor: pointer;">
+        <span style="color: #007bff;"> Import Attendance</span>
+        <input type="file" accept=".json" onchange="importAttendance(event)" style="display: none;" />
+      </label>
+    </div>
+
+    <div id="today"></div>
+  </div>
+
+  <script>
+    const input = document.createElement('input');
+    input.setAttribute('type', 'date');
+    if (input.type !== 'date') {
+      const fallback = document.getElementById('datePicker');
+      fallback.type = 'text';
+      fallback.placeholder = 'YYYY-MM-DD';
+      fallback.addEventListener('focus', () => {
+        alert('Please enter date in YYYY-MM-DD format.');
+      });
+    }
+
+    let timetable = {};
+    fetch('updated_weekly_timetable.json')
+      .then(res => res.json())
+      .then(data => timetable = data)
+      .catch(err => console.error("Failed to load timetable:", err));
+
+    let attendance = JSON.parse(localStorage.getItem('attendance')) || {};
+
+    function updateSchedule() {
+      if (!document.getElementById('view-timetable').classList.contains('hidden')) {
+        const tabs = document.querySelector('.tabs button.active');
+        if (tabs) {
+          showDaySchedule(tabs.textContent);
+        }
+      } else if (!document.getElementById('add-attendance').classList.contains('hidden')) {
+        showDateSchedule();
+      }
+    }
+
+    function getSelectedBatch(groupName) {
+      const radios = document.getElementsByName(groupName);
+      for (const r of radios) {
+        if (r.checked) return r.value;
+      }
+      return "1";
+    }
+
+    function clearSections() {
+      document.getElementById('view-timetable').classList.add('hidden');
+      document.getElementById('stats').classList.add('hidden');
+      document.getElementById('add-attendance').classList.add('hidden');
+    }
+
+    function showTimetableView() {
+      clearSections();
+      document.getElementById('view-timetable').classList.remove('hidden');
+      document.getElementById('day-schedule').innerHTML = '<p>Please select a day to view the timetable.</p>';
+    }
+
+    function showAttendanceStats() {
+      clearSections();
+      const statsDiv = document.getElementById('stats');
+      statsDiv.classList.remove('hidden');
+      statsDiv.innerHTML = `
+        <h3>Attendance Stats</h3>
+        <div style="margin-bottom: 10px;">
+          <button onclick="showTab('Theory')" class="tab-btn" id="tab-Theory">Theory</button>
+          <button onclick="showTab('Lab')" class="tab-btn" id="tab-Lab">Lab</button>
+          <button onclick="clearLogs()" style="background-color: red; margin-left: 10px;">Clear Attendance Logs</button>
+        </div>
+        <div id="Theory" class="tab-content"></div>
+        <div id="Lab" class="tab-content hidden"></div>
+      `;
+
+      const groupedSubjects = {
+        Theory: new Set(),
+        Lab: new Set()
+      };
+
+      for (const day in timetable) {
+        for (const slot in timetable[day]) {
+          const entries = timetable[day][slot];
+          if (entries && entries !== 'Lunch') {
+            for (const key in entries) {
+              const subj = entries[key];
+              if (groupedSubjects[subj.Type]) {
+                groupedSubjects[subj.Type].add(subj['Course Name']);
+              }
+            }
+          }
+        }
+      }
+
+      const subjectTotals = {};
+      for (const date in attendance) {
+        for (const subject in attendance[date]) {
+          const status = attendance[date][subject];
+          if (!subjectTotals[subject]) subjectTotals[subject] = { present: 0, total: 0, logs: [] };
+          if (status === 'Present' || status === 'Attendance Given') subjectTotals[subject].present++;
+          if (status !== 'No Class') subjectTotals[subject].total++;
+          subjectTotals[subject].logs.push({ date, status });
+        }
+      }
+
+      ['Theory', 'Lab'].forEach(type => {
+        const container = document.getElementById(type);
+        groupedSubjects[type].forEach(subject => {
+          const data = subjectTotals[subject] || { present: 0, total: 0, logs: [] };
+          const percent = data.total > 0 ? ((data.present / data.total) * 100).toFixed(1) : '0';
+          const logId = `log-${subject.replace(/\s+/g, '-')}`;
+          container.innerHTML += `
+            <p><strong style="cursor:pointer;" onclick="toggleLogs('${logId}')">${subject}</strong>: ${percent}% (${data.present}/${data.total})</p>
+            <ul id="${logId}" class="hidden">
+              ${data.logs.map(log => `<li>${log.date} – ${log.status}</li>`).join('')}
+            </ul>
+          `;
+        });
+      });
+    }
+
+    function showTab(type) {
+      document.getElementById('Theory').classList.add('hidden');
+      document.getElementById('Lab').classList.add('hidden');
+      document.getElementById('tab-Theory').classList.remove('active');
+      document.getElementById('tab-Lab').classList.remove('active');
+      document.getElementById(type).classList.remove('hidden');
+      document.getElementById(`tab-${type}`).classList.add('active');
+    }
+
+    function toggleLogs(id) {
+      const el = document.getElementById(id);
+      el.classList.toggle('hidden');
+    }
+
+    function clearLogs() {
+      if (confirm("Are you sure you want to clear all attendance logs? This cannot be undone.")) {
+        localStorage.removeItem('attendance');
+        attendance = {};
+        showAttendanceStats();
+      }
+    }
+
+    function showAddAttendance() {
+      clearSections();
+      document.getElementById('add-attendance').classList.remove('hidden');
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('datePicker').value = today;
+      showDateSchedule();
+    }
+
+    function showDaySchedule(day) {
+      const batch = getSelectedBatch('batchSelectView');
+      const container = document.getElementById('day-schedule');
+      const schedule = timetable[day];
+      container.innerHTML = `<h4>${day}</h4>`;
+      if (!schedule || Object.keys(schedule).length === 0) {
+        container.innerHTML += '<p>No classes scheduled.</p>';
+        return;
+      }
+
+      for (const time in schedule) {
+        const entries = schedule[time];
+        if (!entries || entries === 'Lunch') {
+          container.innerHTML += `<p><strong>${time}:</strong> ${entries || 'No class'}</p>`;
+        } else {
+          for (const key in entries) {
+            const item = entries[key];
+            if (item.Type === 'Lab' && item.Batch !== batch) continue;
+            container.innerHTML += `
+              <div class="class-entry">
+                <strong>${time}</strong><br />
+                <strong>${item['Course Name']}</strong><br />
+                ${item.Type} by ${item.Teacher} @ ${item.Room}<br />
+              </div>
+            `;
+          }
+        }
+      }
+    }
+
+    function showDateSchedule() {
+      const date = document.getElementById('datePicker').value;
+      if (!date) return;
+      const batch = getSelectedBatch('batchSelectAdd');
+      const day = getWeekday(date);
+      const schedule = timetable[day];
+      const todayDiv = document.getElementById('today');
+      todayDiv.innerHTML = `<h4>${day} - ${date}</h4>`;
+      if (!schedule || Object.keys(schedule).length === 0) {
+        todayDiv.innerHTML += '<p>No classes scheduled.</p>';
+        return;
+      }
+
+      for (const time in schedule) {
+        const entries = schedule[time];
+        if (!entries || entries === 'Lunch') {
+          todayDiv.innerHTML += `<p><strong>${time}:</strong> ${entries || 'No class'}</p>`;
+        } else {
+          for (const key in entries) {
+            const item = entries[key];
+            if (item.Type === 'Lab' && item.Batch && item.Batch !== batch) continue;
+            const currentStatus = attendance[date]?.[item['Course Name']] || 'Not marked';
+            todayDiv.innerHTML += `
+              <div class="class-entry">
+                <strong>${time}</strong><br />
+                <strong>${item['Course Name']}</strong><br />
+                ${item.Type} by ${item.Teacher} @ ${item.Room}<br />
+                <label>Status:
+                  <select onchange="logAttendance('${item['Course Name']}', this.value, '${date}')">
+                    <option value="">-- Select --</option>
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                    <option value="No Class">No Class</option>
+                    <option value="Attendance Given">Attendance Given</option>
+                  </select>
+                </label><br />
+                <em>Logged: ${currentStatus}</em>
+              </div>
+            `;
+          }
+        }
+      }
+    }
+
+    function getWeekday(dateStr) {
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      return days[new Date(dateStr).getDay()];
+    }
+
+    function logAttendance(subject, status, date) {
+      if (!status) return;
+      if (!attendance[date]) attendance[date] = {};
+      attendance[date][subject] = status;
+      localStorage.setItem('attendance', JSON.stringify(attendance));
+      showDateSchedule();
+    }
+
+    function exportAttendance() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(attendance, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "attendance.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      document.body.removeChild(downloadAnchor);
+    }
+
+    function importAttendance(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (typeof imported === 'object') {
+            attendance = imported;
+            localStorage.setItem('attendance', JSON.stringify(imported));
+            alert("Attendance data imported!");
+          }
+        } catch {
+          alert("Invalid file format");
+        }
+      };
+      reader.readAsText(file);
+    }
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker Registered'));
+    }
+  </script>
+</body>
+</html>

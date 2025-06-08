@@ -1,0 +1,239 @@
+{
+  "Monday": {
+    "9-10": null,
+    "10-1": {
+      "Ph.Analysis": {
+        "Course Name": "Pharmaceutical Analysis - Batch-1",
+        "Type": "Lab",
+        "Teacher": "Abhiram M S",
+        "Room": "Lab no. 12",
+        "Batch": "1"
+      },
+      "Ph.Formulation": {
+        "Course Name": "Pharmaceutical Formulations - Batch-2",
+        "Type": "Lab",
+        "Teacher": "Dr. Kalavathy D J",
+        "Room": "Room no. 52",
+        "Batch": "2"
+      }
+    },
+    "1-2": "Lunch",
+    "2-3": {
+      "Ph.cology-II": {
+        "Course Name": "Pharmacology-II",
+        "Type": "Theory",
+        "Teacher": "Dr. Anil Kumar K V",
+        "Room": "Room no. 52"
+      }
+    },
+    "3-4": {
+      "MC": {
+        "Course Name": "Medicinal Chemistry",
+        "Type": "Theory",
+        "Teacher": "Dr. Manohara Reddy S A",
+        "Room": "Room no. 52"
+      }
+    },
+    "4-5": {
+      "Ph.Analysis": {
+        "Course Name": "Pharmaceutical Analysis",
+        "Type": "Theory",
+        "Teacher": "Abhiram M S",
+        "Room": "Room no. 52"
+      }
+    }
+  },
+  "Tuesday": {
+    "9-10": {
+      "Ph.cology-II": {
+        "Course Name": "Pharmacology-II",
+        "Type": "Theory",
+        "Teacher": "Dr. Anil Kumar K V",
+        "Room": "Room no. 52"
+      }
+    },
+    "10-11": {
+      "MC": {
+        "Course Name": "Medicinal Chemistry",
+        "Type": "Theory",
+        "Teacher": "Dr. Manohara Reddy S A",
+        "Room": "Room no. 52"
+      }
+    },
+    "11-12": {
+      "Ph.Juris": {
+        "Course Name": "Pharmaceutical Jurisprudence",
+        "Type": "Theory",
+        "Teacher": "Sanjana N K",
+        "Room": "Room no. 52"
+      }
+    },
+    "12-1": {
+      "Ph.Analysis": {
+        "Course Name": "Pharmaceutical Analysis",
+        "Type": "Theory",
+        "Teacher": "Dr. Narendra B Gowda",
+        "Room": "Room no. 52"
+      }
+    },
+    "1-2": "Lunch",
+    "2-5": {
+      "Ph.Formulation": {
+        "Course Name": "Pharmaceutical Formulations - Batch-1",
+        "Type": "Lab",
+        "Teacher": "Dr. G.Y. Narmada",
+        "Room": "Lab no. 19",
+        "Batch": "1"
+      },
+      "Ph.Analysis": {
+        "Course Name": "Pharmaceutical Analysis - Batch-2",
+        "Type": "Lab",
+        "Teacher": "Abhiram M S",
+        "Room": "Room no. 52",
+        "Batch": "2"
+      }
+    }
+  },
+  "Wednesday": {
+    "9-10": null,
+    "10-1": {
+      "PT-II": {
+        "Course Name": "Pharmacotherapeutics-II - Batch-1",
+        "Type": "Lab",
+        "Teacher": "Dr. Prasanna Babu",
+        "Room": "Lab No. 22",
+        "Batch": "1"
+      },
+      "MC": {
+        "Course Name": "Medicinal Chemistry - Batch-2",
+        "Type": "Lab",
+        "Teacher": "Dr. Manohara Reddy S A",
+        "Room": "Room no. 52",
+        "Batch": "2"
+      }
+    },
+    "12-1": null,
+    "1-2": "Lunch",
+    "2-3": {
+      "PT-II": {
+        "Course Name": "Pharmacotherapeutics-II",
+        "Type": "Theory",
+        "Teacher": "Dr. Prasanna Babu",
+        "Room": "Room no. 52"
+      }
+    },
+    "3-4": {
+      "PT-II": {
+        "Course Name": "Pharmacotherapeutics-II",
+        "Type": "Theory",
+        "Teacher": "Dr. Shekar H S",
+        "Room": "Room no. 52"
+      }
+    },
+    "4-5": {
+      "PT-II": {
+        "Course Name": "Pharmacotherapeutics-II",
+        "Type": "Theory",
+        "Teacher": "Dr. Prasanna Babu",
+        "Room": "Room no. 52"
+      }
+    }
+  },
+  "Thursday": {
+    "9-10": null,
+    "10-11": {
+      "Ph.Juris": {
+        "Course Name": "Pharmaceutical Jurisprudence",
+        "Type": "Theory",
+        "Teacher": "Sanjana N K",
+        "Room": "Room no. 52"
+      }
+    },
+    "11-12": {
+      "Ph.Form": {
+        "Course Name": "Pharmaceutical Formulations",
+        "Type": "Theory",
+        "Teacher": "Dr. G.Y. Narmada",
+        "Room": "Room no. 52"
+      }
+    },
+    "12-1": {
+      "Ph.Analysis": {
+        "Course Name": "Pharmaceutical Analysis",
+        "Type": "Theory",
+        "Teacher": "Dr. Narendra B Gowda",
+        "Room": "Room no. 52"
+      }
+    },
+    "1-2": "Lunch",
+    "2-5": {
+      "Ph.cology-II": {
+        "Course Name": "Pharmacology-II Batch-1",
+        "Type": "Lab",
+        "Teacher": "Dr. Anil Kumar K V",
+        "Room": "Lab no. 30",
+        "Batch": "1"
+      }
+    }
+  },
+  "Friday": {
+    "9-10": null,
+    "10-11": {
+      "MC": {
+        "Course Name": "Medicinal Chemistry",
+        "Type": "Theory",
+        "Teacher": "Dr. Manohara Reddy S A",
+        "Room": "Room no. 35"
+      }
+    },
+    "11-12": {
+      "Ph.cology-II": {
+        "Course Name": "Pharmacology-II",
+        "Type": "Theory",
+        "Teacher": "Dr. Anil Kumar K V",
+        "Room": "Room no. 35"
+      }
+    },
+    "12-1": {
+      "Ph.Form": {
+        "Course Name": "Pharmaceutical Formulations",
+        "Type": "Theory",
+        "Teacher": "Dr. Kalavathy D J",
+        "Room": "Room no. 35"
+      }
+    },
+    "1-2": "Lunch",
+    "2-5": {
+      "MC": {
+        "Course Name": "Medicinal Chemistry - Batch-1",
+        "Type": "Lab",
+        "Teacher": "Dr. Manohara Reddy S A",
+        "Room": "Lab No. 22",
+        "Batch": "1"
+      },
+      "PT-II": {
+        "Course Name": "Pharmacotherapeutics-II - Batch-2",
+        "Type": "Lab",
+        "Teacher": "Dr. Prasanna Babu",
+        "Room": "Room No. 37",
+        "Batch": "2"
+      }
+    }
+  },
+  "Saturday": {
+    "9-10": null,
+    "10-1": {
+      "Ph.cology-II": {
+        "Course Name": "Pharmacology-II - Batch-2",
+        "Type": "Lab",
+        "Teacher": "Dr. Anil Kumar K V",
+        "Room": "Lab no. 30",
+        "Batch": "2"
+      }
+    },
+    "1-2": "Lunch",
+    "2-3": null,
+    "3-4": null,
+    "4-5": null
+  }
+}
